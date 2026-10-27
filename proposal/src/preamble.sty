@@ -1,0 +1,61 @@
+% Control page margins
+\usepackage[a4paper, margin=2cm]{geometry}
+
+% Change font in main body
+\usepackage{ebgaramond}
+
+% Change format of sections and subsections
+\usepackage{titlesec}
+
+\titleformat{\section}{\Large\mdseries\scshape}{\thesection}{1em}{}
+\titleformat{\subsection}{\large\mdseries\scshape}{\thesubsection}{1em}{}
+
+% Change format of labels in table of contents (TOC)
+\usepackage{tocloft}
+
+\renewcommand{\cfttoctitlefont}{\LARGE\mdseries\scshape}
+\renewcommand{\cftsecfont}{\mdseries\scshape}
+\renewcommand{\cftsubsecfont}{\normalfont\mdseries\scshape}
+
+% Required for inserting images
+\usepackage{graphicx}
+
+% Use hyphens to break text across lines
+% htt will elicit many Font Warning messages; these can be ignored.
+% \usepackage[htt]{hyphenat}
+
+% Create code blocks
+\usepackage{minted}
+
+% Remove indents from start of paragraphs
+\setlength{\parindent}{0cm}
+
+% Increase spacing between paragraphs
+\setlength{\parskip}{0.8em}
+
+% Required for hyperlinks
+\usepackage{hyperref}
+
+% Bibliography
+\usepackage[backend=biber,style=ieee,sorting=none]{biblatex}
+\addbibresource{references.bib}
+
+% Define Wikipedia-style citations
+%\DeclareCiteCommand{\cite}[\mkbibsuperscript] % wikipedia citations
+%  {\iffieldundef{prenote}
+%	 {}
+%	 {\BibliographyWarning{Ignoring prenote argument}}%
+%   \iffieldundef{postnote}
+%	 {}
+%	 {\BibliographyWarning{Ignoring postnote argument}}}
+%  {\usebibmacro{citeindex}%
+%   \bibopenbracket\usebibmacro{cite}\bibclosebracket}
+%  {\citedelim}
+%  {}
+
+% Use coloured links
+\usepackage[table,dvipsnames,svgnames]{xcolor}
+\hypersetup{colorlinks=true, linkcolor=Maroon, filecolor=RedViolet, urlcolor=Maroon, citecolor=RedViolet}
+
+% Required for multi-row spanning cells in tables
+\usepackage{multirow}

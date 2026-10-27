@@ -1,0 +1,164 @@
+\documentclass[a4paper, 12pt]{article}
+\usepackage{preamble}
+
+\begin{document}
+
+% START of title
+\begin{center}
+    \Large{\textit{Project proposal}} \\
+    \Huge{DiagraML: a programmatic diagramming library for OCaml}
+    
+    \vspace{1cm}
+    
+    \large{Arya Golkari, Trinity College} \\
+    \large{Computer Science Tripos, Part II} \\
+    \large{2026--2027} \\
+
+    \vspace{1cm}
+
+    \begin{tabular}{@{}l@{\hspace{1em}}l@{}}
+        \large\textsc{Marking supervisor} & \multirow{2}{*}{\large{Professor Anil Madhavapeddy}} \\
+        \large\textsc{Day-to-day supervisor} & \\
+        & \\
+        \multirow{3}{*}{\large\textsc{Directors of studies}} & \large{Dr Sean Holden} \\ 
+        & \large{Professor Neel Krishnaswami} \\ 
+        & \large{Professor Frank Stajano}
+    \end{tabular}
+\end{center}
+% END of title
+
+\vspace{2cm}
+
+\begingroup
+\setlength{\parskip}{0pt}
+\tableofcontents
+\endgroup
+
+\newpage
+
+\section{Introduction and description}
+
+As a general rule, adding visualisations to texts increases comprehensibility \cite{visualisationsAreGood}. Data structures in the field of computer science are not an exception to this rule; visualisations can greatly enhance students' learning \cite{visualisationsForDataStructs}. However, producing usable and intuitive diagrams is time-consuming, and as a consequence, is often neglected.
+
+\href{https://www.siddharthaprasad.com/spytial/}{Spytial}\footnote{Sometimes stylised as sPyTial.} aims to alleviate this problem. It defines a declarative domain-specific language (DSL), capturing spatial features of data, from which interactive diagrams are rendered \cite{spytial}. I recommend the reader take a moment to familiarise themselves with Spytial via its \href{https://www.siddharthaprasad.com/spytial/playground/}{playground}.
+
+\subsection{Core goals}
+
+The aim of this project is to create a programmatic diagramming library for OCaml, heavily inspired by Spytial. This comprises two primary components: a composable DSL for describing structured data and spatial invariants, and a constraint solver that realises the diagram layout.
+
+The DSL shall be embedded in OCaml, and need not maintain a one-to-one correspondence with existing Spytial DSLs in Python or other languages. This presents an opportunity for reducing the space of compilable yet syntactically invalid diagrams.
+
+The constraint solver shall be an implementation, in OCaml, of \href{https://constraints.cs.washington.edu/cassowary/}{Cassowary}, an incremental algorithm for efficient linear arithmetic constraint-solving \cite{cassowaryIntro}. It is notable that, to the best of my knowledge, this will be the first OCaml implementation.
+
+The output shall be a rendered diagram (ideally, interactive) if the constraints are satisfiable. Otherwise, the program shall produce an error message.
+
+\subsection{Extension goals}
+
+If time permits, I shall endeavour to embellish the project beyond the core requirements.
+
+\textsc{Interaction} \hspace{1em} Output a browser target (likely using \texttt{js\_of\_ocaml}) for interactive use. Graph nodes become draggable.
+
+\textsc{IIS reporting} \hspace{1em} Identify irreducible infeasible subsystems for unsatisfiable constraints and report them. Reports can be textual or visual.
+
+\textsc{Non-rejection} \hspace{1em} Produce best-effort diagrams when the constraints are unsatisfiable by weakening or dropping some constraints.
+
+\textsc{Bespoke constraint-solving} \hspace{1em} Devise a bespoke incremental constraint-solving algorithm, tailored to the specific use case of a programmatic diagramming library.
+
+\textsc{Expression} \hspace{1em} Propose and implement new constraints or directives.
+
+\section{Starting point}
+
+I have done no prior work for this project other than the preliminary research required to produce this document.
+
+\section{Project structure}
+
+In essence, the project comprises four components: the DSL, the intermediate representation, the frontend, and the backend.
+
+\textsc{DSL} \hspace{1em} A language for describing diagrams and spatial invariants, embedded within OCaml. It will most likely exploit OCaml's generalised algebraic datatypes (GADTs), but the specific design will be decided as part of the project.
+
+\textsc{Intermediate representation} \hspace{1em} A language for representing diagrams and spatial invariants that is lower-level than the DSL, and is invisible to the user. In Spytial, this is embedded within JSON and YAML. Here, the intermediate representation will (most likely) be in OCaml.
+
+\textsc{Frontend} \hspace{1em} A compiler for translating from the DSL into the intermediate representation.
+
+\textsc{Backend} \hspace{1em} A compiler for translating from the intermediate representation into a visualisable output. It comprises constraint-solving. The core requirement is for the output to be a static (likely SVG) file. In Spytial, the backend is called \href{https://github.com/sidprasad/spytial-core}{\texttt{spytial-core}} and is largely written in TypeScript. Here, it will be written primarily or purely in OCaml.
+
+\section{Success criteria and evaluation plan}
+
+The project will be considered a success if the resulting diagramming library is able to \textit{correctly} produce all 22 examples used for benchmarking in the paper that introduced Spytial \cite{spytial}. Examples are a representative sample of diagrams in the popular and widely taught textbook on algorithms and data structures, \textit{Introduction to Algorithms (CLRS)} \cite{clrs1994}. An outputted diagram is \textit{correct} if all constraints (but not necessarily decorative directives) are obeyed.
+
+Evaluation will be multi-faceted.
+
+\textsc{Performance} \hspace{1em} I shall measure diagram generation times (excluding rendering times) for the above-mentioned examples and for different diagram sizes, using my implementation and the original Python Spytial implementation, and compare them.
+
+\textsc{Representability} \hspace{1em} I shall compare, qualitatively, the space of programmatically representable or compilable diagram definitions that are ill-formed and cannot be converted into a rendered visual, between my implementation and the original Spytial implementation.
+
+\textsc{Aestheticity} \hspace{1em} I shall assess, qualitatively, how the diagrams produced by my OCaml library compare, from an aesthetic perspective, to those produced by Spytial. Aestheticity is positively correlated with user efficiency and engagement \cite{aestheticity}. Aestheticity is inherently subjective, but the evaluation will focus on more objective aspects, such as lack of unnecessary kinks in links and consistent spacing between nodes.
+
+\section{Work plan}
+
+\begin{center}
+    \begin{tabular}{@{}l@{\hspace{1em}}c@{\hspace{1em}}l@{}}
+         & \textbf{Duration} & \\
+        \textbf{Due date} & \textbf{(days)} & \textbf{Task} \\
+        \hline
+        2026-10-18 & 10 & Read \textit{Real World OCaml} \cite{realWorldOCaml} \\
+        \hline
+        2026-10-25 & 7 & Design the DSL and intermediate representation \\
+        \hline
+        2026-11-08 & 14 & Implement the frontend \\
+        \hline
+        \multirow{2}{*}{2026-11-15} & \multirow{2}{*}{7} & Compose frontend with Spytial's backend and test \\
+         & & \textsc{Milestone} \hspace{1em} frontend complete \\
+         \hline
+        2026-11-29 & 14 & Read literature on Cassowary and its implementations \\
+        \hline
+        2026-12-13 & 14 & Implement Cassowary in OCaml \\
+        \hline
+        \multirow{2}{*}{2026-12-20} & \multirow{2}{*}{7} & Test the Cassowary implementation (and debug) \\
+         & & \textsc{Milestone} \hspace{1em} constraint solver complete \\
+         \hline
+        2027-01-03 & 14 & Implement backend (with hard constraints only) \\
+        \hline
+        2027-01-17 & 14 & Add weak constraints (for improved visuals) \\
+        \hline
+        \multirow{2}{*}{2027-01-31} & \multirow{2}{*}{14} & Create CLRS diagrams in Spytial and OCaml \\
+         & & \textsc{Milestone} \hspace{1em} success criteria met \\
+         \hline
+        2027-02-05 & 5 & \textsc{Deadline} \hspace{1em} write \textit{progress report} \\
+        \hline
+        2027-02-10 & 5 & Prepare \textit{progress report presentation} \\
+        \hline
+        2027-02-24 & 14 & \textsc{Extension} \hspace{1em} implement interactive output \\
+        \hline
+        2027-03-10 & 14 & \textsc{Extension} \hspace{1em} improve responsiveness \\
+        \hline
+        2027-03-24 & 14 & \textsc{Extension} \hspace{1em} implement textual IIS reporting \\
+        \hline
+        2027-04-04 & 11 & \textsc{Extension} \hspace{1em} implement visual IIS reporting \\
+        \hline
+        2027-04-11 & 7 & Write dissertation chapters 1 and 2 \\
+        \hline
+        2027-04-18 & 7 & Write dissertation chapter 3 \\
+        \hline
+        2027-04-25 & 7 & Write dissertation chapter 4 \\
+        \hline
+        2027-05-02 & 7 & Write dissertation chapter 5 \\
+        \hline
+        2027-05-14 & 12 & \textsc{Deadline} \hspace{1em} polish dissertation
+    \end{tabular}
+\end{center}
+
+\section{Resource declaration}
+
+I will use my personal laptop, an MSI Raider GE78 HX 14VHG with an Intel Core i9-14900HX processor and 32 GB of RAM running Windows 11 Pro. I accept full responsibility for this machine and I have made contingency plans to protect myself against hardware and/or software failure.
+
+I will also use OCaml, Spytial, Cassowary, and tools within their ecosystems, all of which are open source.
+
+I will use GitHub for version control (and as backup). I will store copies of anything not committed to a remote git repository on a flash drive.
+
+I will use Overleaf to produce the dissertation (and have used it to produce this proposal). I will also store local copies of all \LaTeX{} documents to protect against any service unavailability.
+
+\newpage
+\printbibliography
+
+\end{document}

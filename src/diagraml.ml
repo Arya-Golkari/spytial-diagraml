@@ -5,6 +5,23 @@ type 'a edge = 'a -> 'a option
 type 'a attribute = 'a -> string option
 type rgb = { r : int; g : int; b : int }
 
+type 'a atom = Atom of 'a
+
+type _ selector =
+| Atom : 'a atom -> 'a selector
+| Edge : 'a edge -> ('a * 'a) selector
+| Unary : 'a atom * ('a -> bool) -> 'a selector
+| Binary : 'a atom * 'a atom * ('a * 'a -> bool) -> ('a * 'a) selector
+| Follow : 'a atom * 'a edge -> ('a * 'a) selector
+| Reverse : 'a atom * 'a edge -> ('a * 'a) selector
+| Reach : 'a atom * 'a edge -> ('a * 'a) selector
+| ReachId : 'a atom * 'a edge -> ('a * 'a) selector
+| Union : 'a selector * 'a selector -> 'a selector
+| Intersection : 'a selector * 'a selector -> 'a selector
+| Difference : 'a selector * 'a selector -> 'a selector
+| Cross : 'a selector * 'b selector -> ('a * 'b) selector
+| List : ('a list) selector -> 'a selector
+
 type direction =
 | Above
 | Below
@@ -49,41 +66,3 @@ module type DiagramNode = sig
   val constraints : (t constrain) list
   val directives : (t directive) list
 end
-
-type 'a tree = 
-| Leaf
-| InnerNode of 'a tree * 'a * 'a tree
-
-module TreeDiagramNode : DiagramNode with type t = int tree = struct
-  type t = int tree
-
-  let edges = [
-    ("left", fun n -> 
-      match n with
-      | Leaf -> None
-      | InnerNode (left, _, _) -> Some left
-    );
-    ("right", fun n ->
-      match n with
-      | Leaf -> None
-      | InnerNode (_, _, right) -> Some right
-    );
-  ]
-
-  let attributes = [
-    ("value", fun n ->
-      match n with
-      | Leaf -> None
-      | InnerNode (_, value, _) -> Some (string_of_int value)
-    )
-  ]
-  
-  let constraints = []
-  let directives = []
-end
-
-let my_tree = InnerNode (Leaf, 1, InnerNode (Leaf, 2, Leaf))
-
-let get_right = List.assoc "right" TreeDiagramNode.edges
-let get_value = List.assoc "value" TreeDiagramNode.attributes
-let value = Option.get (get_value (Option.get (get_right my_tree)))

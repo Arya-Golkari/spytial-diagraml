@@ -1,4 +1,11 @@
-(executables
- (names main)
+(library
+ (name diagraml)
+ (modules diagraml)
  (libraries zarith)
+)
+
+(executables
+ (names client)
+ (modules client)
+ (libraries diagraml)
 )

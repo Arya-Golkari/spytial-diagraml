@@ -1,26 +1,46 @@
-type 'a selector_one = 'a -> bool
-type 'a selector_two = 'a -> 'a -> bool
-type 'a partition = 'a -> int
-type 'a edge = 'a -> 'a option
-type 'a attribute = 'a -> string option
 type rgb = { r : int; g : int; b : int }
 
-type 'a atom = Atom of 'a
+type 'a atom = Atom : string -> 'a atom
+type ('a, 'b) field = Field : string -> ('a, 'b) field
+
+type dynamic_atom = DynamicAtom : 'a atom -> dynamic_atom
+type dynamic_field = DynamicField : ('a, 'b) field -> dynamic_field
 
 type _ selector =
 | Atom : 'a atom -> 'a selector
-| Edge : 'a edge -> ('a * 'a) selector
-| Unary : 'a atom * ('a -> bool) -> 'a selector
-| Binary : 'a atom * 'a atom * ('a * 'a -> bool) -> ('a * 'a) selector
-| Follow : 'a atom * 'a edge -> ('a * 'a) selector
-| Reverse : 'a atom * 'a edge -> ('a * 'a) selector
-| Reach : 'a atom * 'a edge -> ('a * 'a) selector
-| ReachId : 'a atom * 'a edge -> ('a * 'a) selector
+| Edge : ('a, 'b) field -> ('a * 'b) selector
+| Unary : 'a atom * 'a condition -> 'a selector
+| Binary : 'a atom * 'b atom * ('a * 'b) condition -> ('a * 'b) selector
+| Join : 'a selector * ('a * 'b) selector -> 'b selector
+| Reverse : 'b selector * ('a * 'b) selector -> 'a selector
+| Reach : 'a selector * ('a * 'a) selector -> 'a selector
+| ReachId : 'a selector * ('a * 'a) selector -> 'a selector
 | Union : 'a selector * 'a selector -> 'a selector
 | Intersection : 'a selector * 'a selector -> 'a selector
 | Difference : 'a selector * 'a selector -> 'a selector
 | Cross : 'a selector * 'b selector -> ('a * 'b) selector
 | List : ('a list) selector -> 'a selector
+| Display : 'a selector -> string selector
+and _ condition =
+| EQ : 'a selector * 'a selector -> ('a * 'a) condition
+| EQimm : 'a selector * 'a -> 'a condition
+| IN : 'a selector * ('a list) selector -> ('a * 'a list) condition
+| INimm : 'a selector * 'a list -> 'a condition
+| LT : 'a selector * 'a selector -> ('a * 'a) condition
+| LTimm : 'a selector * 'a -> 'a condition
+| LEQ : 'a selector * 'a selector -> ('a * 'a) condition
+| LEQimm : 'a selector * 'a -> 'a condition
+| GT : 'a selector * 'a selector -> ('a * 'a) condition
+| GTimm : 'a selector * 'a -> 'a condition
+| GEQ : 'a selector * 'a selector -> ('a * 'a) condition
+| GEQimm : 'a selector * 'a -> 'a condition
+| SOME : 'a selector -> 'a condition
+| NO : 'a selector -> 'a condition
+| ONE : 'a selector -> 'a condition
+| LONE : 'a selector -> 'a condition
+| AND : 'a condition * 'a condition -> 'a condition
+| OR : 'a condition * 'a condition -> 'a condition
+| NOT : 'a condition -> 'a condition
 
 type direction =
 | Above
@@ -40,29 +60,30 @@ type aligndir =
 | Horizontal
 | Vertical
 
-type 'a constrain =
-| Orientation of 'a selector_one * direction list
-| Cyclic of 'a selector_two * rotation
-| Align of 'a selector_two * aligndir
-| Group of 'a selector_one * string (* name *)
-| Groups of 'a selector_one * 'a partition * string (* name *) * bool (* showedge *)
-| Size of 'a selector_one * Q.t (* width *) * Q.t (* height *)
-| HideAtom of 'a selector_one
+type constrain =
+| Orientation : ('a * 'b) selector * direction list -> constrain
+| Cyclic : ('a * 'b) selector * rotation -> constrain
+| Align : ('a * 'b) selector * aligndir -> constrain
+| Group : 'a selector * string (* name *) -> constrain
+| Groups : ('a * 'b) selector * string (* name *) * bool (* showedge *) -> constrain
+| Size : 'a selector * Q.t (* width *) * Q.t (* height *) -> constrain
+| HideAtom : 'a selector -> constrain
 
-type 'a directive =
-| Icon of 'a selector_one * string (* filepath *) * bool
-| AtomColor of 'a selector_one * rgb
-| EdgeColor of 'a selector_one * 'a edge * rgb
-| Attribute of 'a selector_one * 'a attribute
-| HideField of 'a selector_one * 'a edge
-| InferredEdge of 'a selector_two * string (* name *) * rgb
+type directive =
+| Icon : 'a selector * string (* filepath *) * bool -> directive
+| AtomColor : 'a selector * rgb -> directive
+| EdgeColor : 'a selector * ('a, 'b) field * rgb -> directive
+| HideField : 'a selector * ('a, 'b) field -> directive
+| InferredEdge : ('a * 'b) selector * string (* name *) * rgb -> directive
+(* no need for Attribute *)
 
 (* signature passed into diagramming function *)
 module type DiagramNode = sig
   type t
 
-  val edges : (string * t edge) list
-  val attributes : (string * t attribute) list
-  val constraints : (t constrain) list
-  val directives : (t directive) list
+  val type_of : t -> dynamic_atom
+  val fields : (dynamic_field * (t -> t option)) list
+  val attributes : (dynamic_field * (t -> string option)) list
+  val constraints : constrain list
+  val directives : directive list
 end

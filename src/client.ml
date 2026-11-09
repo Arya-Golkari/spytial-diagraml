@@ -26,9 +26,9 @@ module TreeDiagramNode : DiagramNode with type t = int tree = struct
   type t = int tree
 
   (* dynamic typing *)
-  let type_of : t -> dynamic_atom = function
-  | Leaf -> DynamicAtom leaf_atom
-  | InnerNode _ -> DynamicAtom inner_node_atom
+  let type_of : t -> dynamic_atom list = function
+  | Leaf -> [DynamicAtom leaf_atom; DynamicAtom node_atom]
+  | InnerNode _ -> [DynamicAtom inner_node_atom; DynamicAtom node_atom]
 
   let fields = [
     (DynamicField left_field, fun n -> 
@@ -52,7 +52,24 @@ module TreeDiagramNode : DiagramNode with type t = int tree = struct
   ]
   
   let constraints = []
-  let directives = []
+  let directives = [
+    AtomColor (
+      (let x = Var (Atom inner_node_atom, "x") in
+      Unary (
+        x,
+        SOME (
+          Type (
+            Join (
+              x,
+              Edge left_field
+            ),
+            inner_node_atom
+          )
+        )
+      )),
+      { r=255; g=0; b=0 }
+    )
+  ]
 end
 
 

@@ -9,8 +9,8 @@ type dynamic_field = DynamicField : ('a, 'b) field -> dynamic_field
 type _ selector =
 | Atom : 'a atom -> 'a selector
 | Edge : ('a, 'b) field -> ('a * 'b) selector
-| Unary : 'a atom * 'a condition -> 'a selector
-| Binary : 'a atom * 'b atom * ('a * 'b) condition -> ('a * 'b) selector
+| Unary : 'a selector * 'a condition -> 'a selector
+| Binary : 'a selector * 'b selector * ('a * 'b) condition -> ('a * 'b) selector
 | Join : 'a selector * ('a * 'b) selector -> 'b selector
 | Reverse : 'b selector * ('a * 'b) selector -> 'a selector
 | Reach : 'a selector * ('a * 'a) selector -> 'a selector
@@ -21,6 +21,8 @@ type _ selector =
 | Cross : 'a selector * 'b selector -> ('a * 'b) selector
 | List : ('a list) selector -> 'a selector
 | Display : 'a selector -> string selector
+| Type : 'a selector * 'b atom -> 'b selector
+| Var : 'a selector * string -> 'a selector
 and _ condition =
 | EQ : 'a selector * 'a selector -> ('a * 'a) condition
 | EQimm : 'a selector * 'a -> 'a condition
@@ -81,7 +83,7 @@ type directive =
 module type DiagramNode = sig
   type t
 
-  val type_of : t -> dynamic_atom
+  val type_of : t -> dynamic_atom list
   val fields : (dynamic_field * (t -> t option)) list
   val attributes : (dynamic_field * (t -> string option)) list
   val constraints : constrain list

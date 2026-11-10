@@ -13,11 +13,6 @@ let leaf_atom : leaf atom = Atom "Leaf"
 let inner_node_atom : inner_node atom = Atom "InnerNode"
 let node_atom : node atom = Atom "Node"
 
-(* fields *)
-type left
-type right
-type value
-
 let left_field : (inner_node, node) field = Field "left"
 let right_field : (inner_node, node) field = Field "right"
 let value_field : (inner_node, string) field = Field "value"

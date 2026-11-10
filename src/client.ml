@@ -25,6 +25,8 @@ let value_field : (inner_node, string) field = Field "value"
 module TreeDiagramNode : DiagramNode with type t = int tree = struct
   type t = int tree
 
+  let root = InnerNode (Leaf, 1, InnerNode (Leaf, 2, Leaf))
+
   (* dynamic typing *)
   let type_of : t -> dynamic_atom list = function
   | Leaf -> [DynamicAtom leaf_atom; DynamicAtom node_atom]
@@ -50,6 +52,10 @@ module TreeDiagramNode : DiagramNode with type t = int tree = struct
       | InnerNode (_, value, _) -> Some (string_of_int value)
     )
   ]
+
+  let display = function
+  | Leaf -> Some "Leaf"
+  | InnerNode (_, value, _) -> Some (string_of_int value)
   
   let constraints = []
   let directives = [
@@ -78,3 +84,5 @@ let my_tree = InnerNode (Leaf, 1, InnerNode (Leaf, 2, Leaf))
 let get_right = List.assoc (DynamicField right_field) TreeDiagramNode.fields
 let get_value = List.assoc (DynamicField value_field) TreeDiagramNode.attributes
 let value = Option.get (get_value (Option.get (get_right my_tree)))
+
+module MyIR = IR(TreeDiagramNode)

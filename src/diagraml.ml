@@ -1,3 +1,4 @@
+(* START of DSL *)
 type rgb = { r : int; g : int; b : int }
 
 type 'a atom = Atom : string -> 'a atom
@@ -83,9 +84,87 @@ type directive =
 module type DiagramNode = sig
   type t
 
+  val root : t
   val type_of : t -> dynamic_atom list
   val fields : (dynamic_field * (t -> t option)) list
   val attributes : (dynamic_field * (t -> string option)) list
+  val display : t -> string option
   val constraints : constrain list
   val directives : directive list
+end
+(* END of DSL *)
+
+(* START of IR *)
+type ir_atom = {
+  id : int;
+  types : dynamic_atom list;
+  label : string
+}
+
+type ir_edge = ir_atom * ir_atom
+
+module type DiagramIR = sig
+  type t
+
+  val atoms : (t * ir_atom) list
+  val edges : (dynamic_field * ir_edge list) list
+end
+
+module IR(DSL : DiagramNode) : DiagramIR with type t = DSL.t = struct
+  type t = DSL.t
+
+  let atoms = (
+    (* depth-first search *)
+    let rec dfs stack found =
+      match stack with
+      | [] -> ([], found)
+      | x :: stack ->
+        if List.memq x found then
+          (stack, found)
+        else
+          List.fold_left
+          (fun (stack, found) (_, f) -> 
+            match f x with
+            | None -> (stack, found)
+            | Some y -> dfs (y :: stack) found
+          )
+          (stack, x :: found)
+          DSL.fields
+    in
+    let (_, found) = dfs [DSL.root] [] in
+    (* create an ir_atom for each atom *)
+    List.mapi
+    (fun i x ->
+      (x, {
+        id=i;
+        types=DSL.type_of x;
+        label=(
+          match DSL.display x with
+          | None -> "id" ^ (string_of_int i)
+          | Some s -> s
+        )
+      })
+    )
+    found
+  )
+
+  let edges = (
+    List.map
+    (fun (field, f) ->
+      (field,
+      List.fold_left
+      (fun es (x, ir_x) ->
+        match f x with
+        | None -> es
+        | Some y -> 
+          match List.assoc_opt y atoms with
+          | None -> es
+          | Some ir_y -> (ir_x, ir_y) :: es
+      )
+      []
+      atoms
+      )
+    )
+    DSL.fields
+  )
 end

@@ -5,7 +5,7 @@
 )
 
 (executables
- (names client)
- (modules client)
+ (names client values)
+ (modules client values)
  (libraries diagraml)
 )

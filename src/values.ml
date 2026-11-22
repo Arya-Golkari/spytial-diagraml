@@ -19,6 +19,17 @@ let bike_vehicle = Bike
 let motorbike_vehicle = Motorbike 300
 let car_vehicle = Car false
 
+type shape =
+| Dot
+| Circle of float (* radius *)
+| Rectangle of float (* width *) * float (* height *)
+| Cuboid of float (* width *) * float (* height *) * float (* depth *)
+
+let dot_shape = Dot
+let circle_shape = Circle 2.
+let rectangle_shape = Rectangle (2., 1.)
+let cuboid_shape = Cuboid (1., 2., 3.)
+
 
 (* lists of simple variant type *)
 type vehicle_list = 

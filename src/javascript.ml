@@ -12,7 +12,7 @@ let create_button text onclick =
 
   (* style *)
   button##.style##.fontSize := Js.string "24px";
-  button##.style##.margrin := Js.string "10px";
+  button##.style##.margin := Js.string "10px";
 
   button
 

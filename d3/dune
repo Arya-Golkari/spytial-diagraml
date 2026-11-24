@@ -1,0 +1,11 @@
+(library 
+ (name d3)
+ (libraries gen_js_api js_of_ocaml)
+ (modes byte)
+)
+
+(rule
+ (targets d3_drag.ml)
+ (deps d3_drag.mli)
+ (action (run %{bin:gen_js_api} %{deps}))
+)
